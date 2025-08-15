@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hand Feedback Game</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- MediaPipe Hands + helpers (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Hand Feedback Game</h1>
+    <div class="controls">
+      <label for="difficulty">Dificultad:</label>
+      <select id="difficulty">
+        <option value="easy">Fácil</option>
+        <option value="medium" selected>Media</option>
+        <option value="hard">Difícil</option>
+      </select>
+      <button id="startBtn">Iniciar</button>
+      <button id="resetBtn">Reiniciar</button>
+      <button id="exportBtn">Exportar datos</button>
+      <button id="helpBtn" class="secondary">Ayuda</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="board">
+      <video id="inputVideo" playsinline></video>
+      <canvas id="gameCanvas"></canvas>
+      <div id="boardActions" class="board-actions">
+        <button id="toggleMoveBtn" class="secondary">Esferas: Iniciar</button>
+      </div>
+    </div>
+    <section class="metrics">
+      <div><strong>Tiempo:</strong> <span id="time">0.0 s</span></div>
+      <div><strong>Puntaje:</strong> <span id="score">0</span></div>
+      <div><strong>Precisión:</strong> <span id="accuracy">—</span></div>
+      <div><strong>Intentos:</strong> <span id="attempts">0</span></div>
+      <div><strong>Gesto:</strong> <span id="gestureLabel">—</span></div>
+    </section>
+  </main>
+
+  <aside id="helpPanel" class="help-panel hidden" aria-live="polite">
+    <div class="help-header">
+      <h2>Ayuda rápida</h2>
+      <button id="helpClose" aria-label="Cerrar ayuda">✕</button>
+    </div>
+    <div class="help-body">
+      <p><strong>Coloca tu mano</strong> a 40–70 cm de la cámara, con <strong>índice visible</strong> y buena luz.</p>
+      <ul class="legend">
+        <li><span class="dot green"></span> <strong>Verde</strong>: índice levantado</li>
+        <li><span class="dot red"></span> <strong>Rojo</strong>: índice + medio levantados</li>
+        <li><span class="dot yellow"></span> <strong>Amarillo</strong>: mano abierta (índice, medio, anular, meñique)</li>
+        <li><span class="dot blue"></span> <strong>Azul</strong>: índice + anular levantados</li>
+        <li><span class="dot gold"></span> <strong>Dorado</strong>: cualquier otro gesto</li>
+      </ul>
+      <p class="tip">Tip: mueve la mano <em>suave y continuo</em>. Si el cursor no responde, vuelve a mostrar el índice a la cámara.</p>
+    </div>
+  </aside>
+
+  <footer>
+    <small><strong>Disclaimer:</strong> Esta herramienta es un prototipo de uso académico y educativo, orientado a la retroalimentación visual en ejercicios motores. No constituye un dispositivo médico y no debe emplearse para diagnóstico, tratamiento o seguimiento clínico sin supervisión profesional.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
