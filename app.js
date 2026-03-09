@@ -149,6 +149,10 @@ function endSessionAttempt() {
   });
 
   updateHUD();
+
+  setTimeout(() => {
+    alert(`¡Sesión finalizada!\nTiempo: ${finalTime}s\nPuntaje: ${state.score}\nPrecisión: ${acc}%`);
+  }, 100);
 }
 
 function pointLineDistance(px, py, x1, y1, x2, y2) {
@@ -313,10 +317,10 @@ document.addEventListener('click', (e) => {
     const vid = document.getElementById('inputVideo');
     if (videoVisible) {
       vid.style.opacity = '1';
-      document.getElementById('toggleVideoBtn').textContent = "Cámara: Ocultar";
+      document.getElementById('toggleVideoBtn').textContent = "Cámara: Visible";
     } else {
       vid.style.opacity = '0';
-      document.getElementById('toggleVideoBtn').textContent = "Cámara: Mostrar";
+      document.getElementById('toggleVideoBtn').textContent = "Cámara: Oculta";
     }
   } else if (id === 'exportBtn') {
     if (state.sessions.length === 0) {
@@ -390,7 +394,7 @@ document.addEventListener('click', (e) => {
     document.getElementById('helpPanel').classList.add('hidden');
   } else if (id === 'toggleMoveBtn') {
     moveEnabled = !moveEnabled;
-    document.getElementById('toggleMoveBtn').textContent = moveEnabled ? "Esferas: Detener" : "Esferas: Iniciar";
+    document.getElementById('toggleMoveBtn').textContent = moveEnabled ? "Esferas: Móviles" : "Esferas: Estáticas";
   }
 });
 

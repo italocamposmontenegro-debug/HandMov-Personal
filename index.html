@@ -38,16 +38,16 @@
       <input type="text" id="patientName" placeholder="Nombre del Paciente" />
       <textarea id="observations" placeholder="Observaciones de la sesión" rows="1"></textarea>
     </div>
+    <div class="settings" style="display: flex; gap: 0.75rem; margin-top: 0.75rem;">
+      <button id="toggleMoveBtn" class="secondary">Esferas: Estáticas</button>
+      <button id="toggleVideoBtn" class="secondary">Cámara: Visible</button>
+    </div>
   </header>
 
   <main>
     <div class="board">
       <video id="inputVideo" playsinline></video>
       <canvas id="gameCanvas"></canvas>
-      <div id="boardActions" class="board-actions">
-        <button id="toggleMoveBtn" class="secondary">Esferas: Iniciar</button>
-        <button id="toggleVideoBtn" class="secondary">Cámara: Ocultar</button>
-      </div>
     </div>
     <section class="metrics">
       <div><strong>Tiempo:</strong> <span id="time">0.0 / 30 s</span></div>
