@@ -1,4 +1,5 @@
 // ===== Utilidades =====
+console.log("HandMov v1.1.0 - Rose Spheres & Hardened Timer - 2026-03-09");
 const $ = (sel) => document.querySelector(sel);
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 const dist = (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1);
