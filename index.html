@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,6 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 </head>
+
 <body>
   <header>
     <h1>Hand Feedback Game</h1>
@@ -24,6 +26,10 @@
       <button id="resetBtn">Reiniciar</button>
       <button id="exportBtn">Exportar datos</button>
       <button id="helpBtn" class="secondary">Ayuda</button>
+    </div>
+    <div class="patient-info">
+      <input type="text" id="patientName" placeholder="Nombre del Paciente" />
+      <textarea id="observations" placeholder="Observaciones de la sesión" rows="1"></textarea>
     </div>
   </header>
 
@@ -54,18 +60,21 @@
       <ul class="legend">
         <li><span class="dot green"></span> <strong>Verde</strong>: índice levantado</li>
         <li><span class="dot red"></span> <strong>Rojo</strong>: índice + medio levantados</li>
-        <li><span class="dot yellow"></span> <strong>Amarillo</strong>: mano abierta (índice, medio, anular, meñique)</li>
+        <li><span class="dot yellow"></span> <strong>Amarillo</strong>: mano abierta (índice, medio, anular, meñique)
+        </li>
         <li><span class="dot blue"></span> <strong>Azul</strong>: índice + anular levantados</li>
         <li><span class="dot gold"></span> <strong>Dorado</strong>: cualquier otro gesto</li>
       </ul>
-      <p class="tip">Tip: mueve la mano <em>suave y continuo</em>. Si el cursor no responde, vuelve a mostrar el índice a la cámara.</p>
+      <p class="tip">Tip: mueve la mano <em>suave y continuo</em>. Si el cursor no responde, vuelve a mostrar el índice
+        a la cámara.</p>
     </div>
   </aside>
 
   <footer>
-    <small><strong>Disclaimer:</strong> Esta herramienta es un prototipo de uso académico y educativo, orientado a la retroalimentación visual en ejercicios motores. No constituye un dispositivo médico y no debe emplearse para diagnóstico, tratamiento o seguimiento clínico sin supervisión profesional.</small>
+    <small>Diseñado para rehabilitación física y terapia ocupacional.</small>
   </footer>
 
   <script src="app.js"></script>
 </body>
+
 </html>
