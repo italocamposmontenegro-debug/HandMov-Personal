@@ -11,7 +11,8 @@ const COLORS = {
   yellow: '#f59e0b',  // Mano abierta (Amber)
   blue: '#3b82f6',  // Índice+anular (Blue)
   accent: '#6366f1',  // Indigo/Premium
-  gray: '#94a3b8'   // Obstáculos (Slate-400)
+  gray: '#94a3b8',   // Neutro
+  obstacle: '#f43f5e' // Obstáculos (Rose-500) - Alta visibilidad
 };
 
 // ===== DOM =====
@@ -112,11 +113,17 @@ function resetMetrics() {
 function updateHUD() {
   const durationLimit = parseInt(document.getElementById('duration').value) || 30;
   let elapsed = 0;
+
   if (running) {
     elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
+    if (elapsed >= durationLimit) {
+      endSessionAttempt();
+      return;
+    }
   } else {
     elapsed = sessionFrozenTime;
   }
+
   timeEl.textContent = `${elapsed.toFixed(1)} / ${durationLimit} s`;
   scoreEl.textContent = state.score.toString();
   document.getElementById('sessionAttempts').textContent = state.sessions.length.toString();
@@ -126,10 +133,6 @@ function updateHUD() {
     const avgErr = state.log.reduce((a, f) => a + (f.path_error || 0), 0) / state.log.length;
     accuracyEl.textContent = `${(Math.max(0, 100 - avgErr)).toFixed(0)}%`;
   } else { accuracyEl.textContent = "—"; }
-
-  if (running && elapsed >= durationLimit) {
-    endSessionAttempt();
-  }
 }
 
 function endSessionAttempt() {
@@ -203,7 +206,7 @@ function drawScene(handPt = null) {
 
   ctx.shadowBlur = 4; ctx.shadowColor = "rgba(0,0,0,0.1)";
   for (const o of state.obstacles) {
-    ctx.fillStyle = COLORS.gray; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = COLORS.obstacle; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.shadowBlur = 0;
 

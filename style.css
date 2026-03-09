@@ -188,7 +188,7 @@ main {
   height: 100%;
   display: block;
   z-index: 2;
-  background: transparent;
+  background: transparent !important;
 }
 
 .board-actions {
