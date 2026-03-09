@@ -43,8 +43,8 @@ const gestureLabelEl = $(gestureLabelSel);
 let running = false;
 let t0 = null;
 let gestureColor = COLORS.accent;
-let gestureLabel = "—";
 let moveEnabled = false;
+let videoVisible = true;
 
 const state = {
   object: { x: 0, y: 0, r: 16 },
@@ -260,6 +260,7 @@ function updateGame(handPt) {
 }
 
 let lastHandPt = null;
+let loopStarted = false;
 function loop() {
   requestAnimationFrame(loop);
   // Siempre actualizar el juego (esto dibujará la línea de meta, etc.)
@@ -301,9 +302,22 @@ document.addEventListener('click', (e) => {
 
     if (!hands) initHands();
     t0 = performance.now(); running = true;
-    if (!lastHandPt && !hands) loop(); // First time call
+    if (!loopStarted) {
+      loopStarted = true;
+      loop();
+    }
   } else if (id === 'stopBtn') {
     if (running) endSessionAttempt();
+  } else if (id === 'toggleVideoBtn') {
+    videoVisible = !videoVisible;
+    const vid = document.getElementById('inputVideo');
+    if (videoVisible) {
+      vid.style.opacity = '1';
+      document.getElementById('toggleVideoBtn').textContent = "Cámara: Ocultar";
+    } else {
+      vid.style.opacity = '0';
+      document.getElementById('toggleVideoBtn').textContent = "Cámara: Mostrar";
+    }
   } else if (id === 'exportBtn') {
     if (state.sessions.length === 0) {
       alert("No hay intentos registrados para generar el reporte PDF.");

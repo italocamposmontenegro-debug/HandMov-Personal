@@ -157,7 +157,17 @@ main {
 }
 
 #inputVideo {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transform: scaleX(-1);
+  /* Efecto espejo para coincidir con el avatar */
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 .board {
@@ -166,13 +176,18 @@ main {
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--gray);
 }
 
 #gameCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   display: block;
-  background: #ffffff;
+  z-index: 2;
+  background: transparent;
 }
 
 .board-actions {
