@@ -42,9 +42,11 @@ const gestureLabelEl = $(gestureLabelSel);
 // ===== Estado del juego =====
 let running = false;
 let t0 = null;
+let sessionFrozenTime = 0; // Guardar tiempo al detener
 let gestureColor = COLORS.accent;
 let moveEnabled = false;
 let videoVisible = true;
+let gestureLabel = "—";
 
 const state = {
   object: { x: 0, y: 0, r: 16 },
@@ -104,12 +106,17 @@ function resetPositions() {
 }
 
 function resetMetrics() {
-  state.log = []; state.score = 0; state.attempts = 0; t0 = null; updateHUD();
+  state.log = []; state.score = 0; state.attempts = 0; t0 = null; sessionFrozenTime = 0; updateHUD();
 }
 
 function updateHUD() {
   const durationLimit = parseInt(document.getElementById('duration').value) || 30;
-  const elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
+  let elapsed = 0;
+  if (running) {
+    elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
+  } else {
+    elapsed = sessionFrozenTime;
+  }
   timeEl.textContent = `${elapsed.toFixed(1)} / ${durationLimit} s`;
   scoreEl.textContent = state.score.toString();
   document.getElementById('sessionAttempts').textContent = state.sessions.length.toString();
@@ -126,13 +133,15 @@ function updateHUD() {
 }
 
 function endSessionAttempt() {
+  if (!running) return;
   running = false;
   document.getElementById('startBtn').disabled = false;
   document.getElementById('stopBtn').disabled = true;
 
   const durationLimit = parseInt(document.getElementById('duration').value) || 30;
   const elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
-  const finalTime = Math.min(elapsed, durationLimit).toFixed(1);
+  sessionFrozenTime = Math.min(elapsed, durationLimit);
+  const finalTime = sessionFrozenTime.toFixed(1);
 
   let acc = 0;
   if (state.log.length > 0) {
