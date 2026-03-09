@@ -262,9 +262,9 @@ function updateGame(handPt) {
 let lastHandPt = null;
 function loop() {
   requestAnimationFrame(loop);
-  if (running || !t0) {
-    updateGame(lastHandPt);
-  }
+  // Siempre actualizar el juego (esto dibujará la línea de meta, etc.)
+  // Lo importante es que log y posiciones solo avancen cuando 'running' es true
+  updateGame(lastHandPt);
 }
 
 let hands = null;
