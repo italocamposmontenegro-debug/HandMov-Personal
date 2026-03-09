@@ -10,21 +10,28 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <!-- jsPDF para exportación de reportes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
   <header>
     <h1>Hand Feedback Game</h1>
     <div class="controls">
-      <label for="difficulty">Dificultad:</label>
+      <label for="difficulty" style="font-weight: 600; font-size: 0.9rem;">Dificultad:</label>
       <select id="difficulty">
         <option value="easy">Fácil</option>
         <option value="medium" selected>Media</option>
         <option value="hard">Difícil</option>
       </select>
-      <button id="startBtn">Iniciar</button>
-      <button id="resetBtn">Reiniciar</button>
-      <button id="exportBtn">Exportar datos</button>
+
+      <label for="duration" style="font-weight: 600; font-size: 0.9rem; margin-left: 0.5rem;">Tiempo (s):</label>
+      <input type="number" id="duration" value="30" min="5" max="300" />
+
+      <button id="startBtn">Iniciar Intento</button>
+      <button id="stopBtn" class="stop-btn" disabled>Detener</button>
+      <button id="exportBtn" class="export-btn">Generar PDF</button>
       <button id="helpBtn" class="secondary">Ayuda</button>
     </div>
     <div class="patient-info">
@@ -42,10 +49,10 @@
       </div>
     </div>
     <section class="metrics">
-      <div><strong>Tiempo:</strong> <span id="time">0.0 s</span></div>
+      <div><strong>Tiempo:</strong> <span id="time">0.0 / 30 s</span></div>
       <div><strong>Puntaje:</strong> <span id="score">0</span></div>
       <div><strong>Precisión:</strong> <span id="accuracy">—</span></div>
-      <div><strong>Intentos:</strong> <span id="attempts">0</span></div>
+      <div><strong>Intentos en Sesión:</strong> <span id="sessionAttempts">0</span></div>
       <div><strong>Gesto:</strong> <span id="gestureLabel">—</span></div>
     </section>
   </main>

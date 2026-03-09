@@ -54,6 +54,7 @@ const state = {
   score: 0,
   attempts: 0,
   log: [],
+  sessions: [], // Novedad: guarda intentos previos
   snap: 0.22,
   goalTol: 28,
   obstacleCount: 0,
@@ -107,17 +108,47 @@ function resetMetrics() {
 }
 
 function updateHUD() {
-  const t = t0 ? ((performance.now() - t0) / 1000).toFixed(1) : "0.0";
-  timeEl.textContent = `${t} s`;
+  const durationLimit = parseInt(document.getElementById('duration').value) || 30;
+  const elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
+  timeEl.textContent = `${elapsed.toFixed(1)} / ${durationLimit} s`;
   scoreEl.textContent = state.score.toString();
-  attemptsEl.textContent = state.attempts.toString();
+  document.getElementById('sessionAttempts').textContent = state.sessions.length.toString();
   gestureLabelEl.textContent = gestureLabel;
 
   if (state.log.length > 0) {
-    // Cálculo de precisión: promedio de error inverso al camino ideal
     const avgErr = state.log.reduce((a, f) => a + (f.path_error || 0), 0) / state.log.length;
     accuracyEl.textContent = `${(Math.max(0, 100 - avgErr)).toFixed(0)}%`;
   } else { accuracyEl.textContent = "—"; }
+
+  if (running && elapsed >= durationLimit) {
+    endSessionAttempt();
+  }
+}
+
+function endSessionAttempt() {
+  running = false;
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+
+  const durationLimit = parseInt(document.getElementById('duration').value) || 30;
+  const elapsed = t0 ? ((performance.now() - t0) / 1000) : 0;
+  const finalTime = Math.min(elapsed, durationLimit).toFixed(1);
+
+  let acc = 0;
+  if (state.log.length > 0) {
+    const avgErr = state.log.reduce((a, f) => a + (f.path_error || 0), 0) / state.log.length;
+    acc = Math.max(0, 100 - avgErr).toFixed(0);
+  }
+
+  state.sessions.push({
+    duration: finalTime,
+    score: state.score,
+    arrivals: state.attempts,
+    accuracy: acc,
+    log: [...state.log]
+  });
+
+  updateHUD();
 }
 
 function pointLineDistance(px, py, x1, y1, x2, y2) {
@@ -152,26 +183,21 @@ function drawScene(handPt = null) {
   const cw = canvas.clientWidth, ch = canvas.clientHeight;
   ctx.clearRect(0, 0, cw, ch);
 
-  // Camino ideal (Línea suave)
   ctx.lineWidth = 2; ctx.strokeStyle = "#e2e8f0";
   ctx.setLineDash([10, 5]);
   ctx.beginPath(); ctx.moveTo(state.pathStart.x, state.pathStart.y); ctx.lineTo(state.pathEnd.x, state.pathEnd.y); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Obstáculos (Esferas Grises pequeñas)
   ctx.shadowBlur = 4; ctx.shadowColor = "rgba(0,0,0,0.1)";
   for (const o of state.obstacles) {
     ctx.fillStyle = COLORS.gray; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.shadowBlur = 0;
 
-  // Objetivo (Meta)
   ctx.fillStyle = COLORS.green; ctx.beginPath(); ctx.arc(state.goal.x, state.goal.y, state.goal.r, 0, Math.PI * 2); ctx.fill();
 
-  // Objeto principal (Avatar coordinado)
   ctx.fillStyle = gestureColor;
   ctx.beginPath(); ctx.arc(state.object.x, state.object.y, state.object.r, 0, Math.PI * 2); ctx.fill();
-  // Borde blanco para contraste
   ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
 
   if (handPt) {
@@ -205,7 +231,6 @@ function updateGame(handPt) {
   for (const o of state.obstacles) {
     if (dist(state.object.x, state.object.y, o.x, o.y) < (state.object.r + o.r)) {
       collided = true;
-      // Retroceso suave por colisión
       state.object.x += (state.pathStart.x - state.object.x) * 0.12;
       state.object.y += (state.pathStart.y - state.object.y) * 0.12;
     }
@@ -214,27 +239,33 @@ function updateGame(handPt) {
   const reached = dist(state.object.x, state.object.y, state.goal.x, state.goal.y) < state.goalTol;
   const err = pointLineDistance(state.object.x, state.object.y, state.pathStart.x, state.pathStart.y, state.pathEnd.x, state.pathEnd.y);
 
-  state.log.push({
-    t_ms: t0 ? Math.round(performance.now() - t0) : 0,
-    obj_x: Math.round(state.object.x),
-    obj_y: Math.round(state.object.y),
-    path_error: Math.round(err),
-    collided, reached, moveEnabled
-  });
+  if (running) {
+    state.log.push({
+      t_ms: t0 ? Math.round(performance.now() - t0) : 0,
+      obj_x: Math.round(state.object.x),
+      obj_y: Math.round(state.object.y),
+      path_error: Math.round(err),
+      collided, reached, moveEnabled
+    });
 
-  if (reached) {
-    state.score += 100 - Math.min(90, Math.round(err));
-    state.attempts += 1;
-    // Intercambiar inicio y fin para bucle continuo
-    const tmp = { ...state.pathStart }; state.pathStart = { ...state.pathEnd }; state.pathEnd = tmp;
-    state.goal.x = state.pathEnd.x; state.goal.y = state.pathEnd.y;
+    if (reached) {
+      state.score += 100 - Math.min(90, Math.round(err));
+      state.attempts += 1;
+      const tmp = { ...state.pathStart }; state.pathStart = { ...state.pathEnd }; state.pathEnd = tmp;
+      state.goal.x = state.pathEnd.x; state.goal.y = state.pathEnd.y;
+    }
   }
 
   updateHUD(); drawScene(handPt);
 }
 
 let lastHandPt = null;
-function loop() { requestAnimationFrame(loop); updateGame(lastHandPt); }
+function loop() {
+  requestAnimationFrame(loop);
+  if (running || !t0) {
+    updateGame(lastHandPt);
+  }
+}
 
 let hands = null;
 async function initHands() {
@@ -265,36 +296,80 @@ document.addEventListener('click', (e) => {
     if (running) return;
     applyDifficulty(document.getElementById('difficulty').value);
     resetPositions(); resetMetrics();
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+
     if (!hands) initHands();
-    t0 = performance.now(); running = true; loop();
-  } else if (id === 'resetBtn') {
-    if (!running) return; state.attempts += 1; resetPositions(); updateHUD();
+    t0 = performance.now(); running = true;
+    if (!lastHandPt && !hands) loop(); // First time call
+  } else if (id === 'stopBtn') {
+    if (running) endSessionAttempt();
   } else if (id === 'exportBtn') {
-    if (!state.log.length) return;
-    const patient = document.getElementById('patientName').value || "Anónimo";
-    const obs = document.getElementById('observations').value || "";
+    if (state.sessions.length === 0) {
+      alert("No hay intentos registrados para generar el reporte PDF.");
+      return;
+    }
 
-    const data = {
-      meta: {
-        patient,
-        observations: obs,
-        created_at: new Date().toISOString(),
-        difficulty: document.getElementById('difficulty').value
-      },
-      summary: {
-        duration_s: t0 ? ((performance.now() - t0) / 1000).toFixed(2) : "0",
-        score: state.score,
-        attempts: state.attempts,
-        accuracy: accuracyEl.textContent
-      },
-      frames: state.log
-    };
+    const patientName = document.getElementById('patientName').value.trim() || 'Anónimo';
+    const observations = document.getElementById('observations').value.trim() || 'Sin observaciones.';
+    const dateStr = new Date().toLocaleDateString();
 
-    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    downloadBlob(jsonBlob, `handmov-session-${patient}-${Date.now()}.json`);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    const csv = ["t_ms,obj_x,obj_y,path_error,collided,reached,moveEnabled", ...state.log.map(f => [f.t_ms, f.obj_x, f.obj_y, f.path_error, f.collided, f.reached, f.moveEnabled].join(","))].join("\n");
-    downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `handmov-session-${patient}-${Date.now()}.csv`);
+    doc.setFontSize(18);
+    doc.setTextColor(99, 102, 241);
+    doc.text("Reporte de Coordinación - HandMov", 14, 20);
+
+    doc.setFontSize(11);
+    doc.setTextColor(30, 30, 30);
+    doc.text(`Paciente: ${patientName}`, 14, 30);
+    doc.text(`Fecha: ${dateStr}`, 14, 36);
+    doc.text(`Dificultad: ${document.getElementById('difficulty').options[document.getElementById('difficulty').selectedIndex].text}`, 14, 42);
+
+    doc.setFontSize(10);
+    doc.text("Observaciones generales:", 14, 52);
+    const splitObs = doc.splitTextToSize(observations, 180);
+    doc.text(splitObs, 14, 58);
+
+    const tableData = state.sessions.map((s, idx) => [
+      `Intento ${idx + 1}`,
+      `${s.duration} s`,
+      s.score,
+      s.arrivals,
+      `${s.accuracy}%`
+    ]);
+
+    let finalY = 60 + (splitObs.length * 5);
+
+    doc.autoTable({
+      startY: finalY + 5,
+      head: [['Sesión', 'Tiempo Completado', 'Puntaje', 'Llegadas a Meta', 'Precisión']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] }
+    });
+
+    let totalScore = 0, totalAcc = 0;
+    state.sessions.forEach(s => {
+      totalScore += parseInt(s.score);
+      totalAcc += parseInt(s.accuracy);
+    });
+    const avgScore = (totalScore / state.sessions.length).toFixed(1);
+    const avgAcc = (totalAcc / state.sessions.length).toFixed(1);
+
+    const afterTableY = doc.lastAutoTable.finalY + 12;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Resumen Global del Paciente`, 14, afterTableY);
+
+    doc.setFontSize(10);
+    doc.text(`Total Intentos Completados: ${state.sessions.length}`, 14, afterTableY + 8);
+    doc.text(`Promedio Puntaje: ${avgScore}`, 14, afterTableY + 14);
+    doc.text(`Promedio Precisión: ${avgAcc}%`, 14, afterTableY + 20);
+
+    doc.save(`Reporte_HandMov_${patientName.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+
   } else if (id === 'helpBtn') {
     document.getElementById('helpPanel').classList.toggle('hidden');
   } else if (id === 'helpClose') {

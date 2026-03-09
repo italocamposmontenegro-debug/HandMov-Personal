@@ -70,7 +70,8 @@ h1 {
 }
 
 .controls select,
-.controls button {
+.controls button,
+.controls input[type="number"] {
   background: var(--panel-bg);
   color: var(--fg);
   border: 1px solid var(--border);
@@ -78,6 +79,12 @@ h1 {
   border-radius: .5rem;
   cursor: pointer;
   transition: all 0.2s;
+  font-family: inherit;
+}
+
+.controls input[type="number"] {
+  width: 80px;
+  text-align: center;
 }
 
 .controls button:hover {
@@ -87,14 +94,57 @@ h1 {
 }
 
 .controls #startBtn {
-  background: var(--accent);
+  background: var(--ok);
   color: white;
-  border-color: var(--accent);
+  border-color: var(--ok);
   font-weight: 600;
+}
+
+.controls #startBtn:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.controls .stop-btn {
+  background: var(--bad);
+  color: white;
+  border-color: var(--bad);
+  font-weight: 600;
+}
+
+.controls .stop-btn:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.controls .stop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--gray);
+  border-color: var(--gray);
+}
+
+.controls .export-btn {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+  font-weight: 600;
+}
+
+.controls .export-btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .controls .secondary {
   background: #f1f5f9;
+  border-color: transparent;
+  color: var(--fg);
+}
+
+.controls .secondary:hover {
+  background: #e2e8f0;
+  color: var(--fg);
   border-color: transparent;
 }
 
